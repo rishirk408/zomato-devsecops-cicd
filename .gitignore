@@ -1,4 +1,12 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+node_modules
+build
+.git
+.gitignore
+README.md
+jenkinsfile
+dependency-check-report
+*.log
+.env# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
 /node_modules
