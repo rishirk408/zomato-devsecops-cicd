@@ -39,19 +39,22 @@ pipeline {
         }
 
         stage('OWASP Dependency Check') {
-            steps {
-                dependencyCheck additionalArguments: '''
-                    --scan .
-                    --format XML
-                    --format HTML
-                    --out dependency-check-report
-                    --disableYarnAudit
-                    --disableNodeAudit
-                ''', odcInstallation: 'OWASP-DC'
+     	   steps {
+                   sh 'mkdir -p dependency-check-report'
 
-                dependencyCheckPublisher pattern: 'dependency-check-report/dependency-check-report.xml'
-            }
-        }
+        	   dependencyCheck additionalArguments: '''
+            	   --project "zomato-devsecops"
+                   --scan .
+                   --format XML
+                   --format HTML
+                   --out dependency-check-report
+                   --disableYarnAudit
+                   --disableNodeAudit
+                   ''', odcInstallation: 'OWASP-DC'
+
+                   dependencyCheckPublisher pattern: 'dependency-check-report/dependency-check-report.xml'
+    }
+}
 
         stage('Trivy Filesystem Scan') {
             steps {
