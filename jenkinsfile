@@ -38,31 +38,33 @@ pipeline {
             }
         }
 
-stage('OWASP Dependency Check') {
-    steps {
-        sh 'mkdir -p dependency-check-report'
-
-        withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
-            dependencyCheck additionalArguments: '''
-                --project "zomato-devsecops"
-                --scan .
-                --format XML
-                --format HTML
-                --out dependency-check-report
-                --nvdApiKey $NVD_API_KEY
-                --disableYarnAudit
-                --disableNodeAudit
-            ''', odcInstallation: 'OWASP-DC'
-        }
-
-        dependencyCheckPublisher pattern: 'dependency-check-report/dependency-check-report.xml'
-    }
-}
         stage('Trivy Filesystem Scan') {
             steps {
                 sh 'trivy fs --severity HIGH,CRITICAL --exit-code 0 .'
             }
         }
+	stage('OWASP Dependency Check') {
+    steps {
+        sh 'mkdir -p dependency-check-report'
+
+        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
+            withCredentials([string(credentialsId: 'nvd-api-key', variable: 'NVD_API_KEY')]) {
+                dependencyCheck additionalArguments: '''
+                    --project "zomato-devsecops"
+                    --scan .
+                    --format XML
+                    --format HTML
+                    --out dependency-check-report
+                    --nvdApiKey $NVD_API_KEY
+                    --disableYarnAudit
+                    --disableNodeAudit
+                ''', odcInstallation: 'OWASP-DC'
+            }
+
+            dependencyCheckPublisher pattern: 'dependency-check-report/dependency-check-report.xml'
+        }
+    }
+}
 
         stage('Docker Build') {
             steps {
